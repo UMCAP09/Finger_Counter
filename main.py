@@ -1,16 +1,18 @@
 import cv2
 import mediapipe as mp
+import time
 
 cap = cv2.VideoCapture(0) # подключение к камере
 mp_Hands = mp.solutions.hands # распознавание рук 
-hands = mp_Hands.Hands(max_num_hands = 2) # характеристики переменной
+hands = mp_Hands.Hands(max_num_hands = 1) # характеристики переменной
 mpDraw = mp.solutions.drawing_utils # инициализируем утилиту для рисования узлов
 
 finger_Coord = [(8, 6), (12, 10), (16, 14), (20, 18)] # координаты узлов
-thumb_Coord = (4, 2) # координаты узла большого пальца
+thumb_Coord = (4, 3) # координаты узла большого пальца
    
 while cap.isOpened(): # проверка доступа к камере
     success, image = cap.read() # получение картинки и переменной True/False
+    prevTime = time.time() 
     if not success: # в случае неудачи
         print('Не удалось получить кадр с web-камеры')
         continue
@@ -31,16 +33,27 @@ while cap.isOpened(): # проверка доступа к камере
                 h, w, c = image.shape
                 cx,cy = int(lm.x*w), int(lm.y*h)
                 fingerslist.append((cx, cy))
+            side = 'left'
+            if fingerslist[5][0] > fingerslist[17][0]:
+                side = 'right'
+
             for coordinate in finger_Coord:
                 if fingerslist[coordinate[0]][1] < fingerslist[coordinate[1]][1]:
                     upcount += 1
-            if fingerslist[thumb_Coord[0]][0] < fingerslist[thumb_Coord[1]][0]:
-                upcount += 1
+            if side == 'left':
+                if fingerslist[thumb_Coord[0]][0] < fingerslist[thumb_Coord[1]][0]:
+                    upcount += 1
+            else:
+                 if fingerslist[thumb_Coord[0]][0] > fingerslist[thumb_Coord[1]][0]:
+                    upcount += 1
 
 
 
-        cv2.putText(image, str(upcount), (50, 150), cv2.FONT_HERSHEY_PLAIN, 10, (0,200, 100), 10)
+        cv2.putText(image, str(upcount), (50, 150), cv2.FONT_HERSHEY_PLAIN, 10, (0,200, 100), 5)
         print(upcount)
+    currentTime = time.time()
+    fps = 1 // (currentTime - prevTime)
+    cv2.putText(image, f'FPS: {int(fps)}', (450, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (240, 100, 0), 3)
     cv2.imshow('image', image)
     if cv2.waitKey(1) & 0xFF == 27: # выход
         break
