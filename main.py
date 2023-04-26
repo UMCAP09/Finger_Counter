@@ -6,6 +6,12 @@ cap = cv2.VideoCapture(0) # подключение к камере
 mp_Hands = mp.solutions.hands # распознавание рук 
 hands = mp_Hands.Hands(max_num_hands = 1) # характеристики переменной
 mpDraw = mp.solutions.drawing_utils # инициализируем утилиту для рисования узлов
+matrixx = {}
+matrixy = {}
+for x in range(640):
+    matrixx[x] = False
+for y in range(480):
+    matrixy[y] = False
 
 finger_Coord = [(8, 6), (12, 10), (16, 14), (20, 18)] # координаты узлов
 thumb_Coord = (4, 3) # координаты узла большого пальца
@@ -51,6 +57,14 @@ while cap.isOpened(): # проверка доступа к камере
 
         cv2.putText(image, str(upcount), (50, 150), cv2.FONT_HERSHEY_PLAIN, 10, (0,200, 100), 5)
         print(upcount)
+    for x in range(len(matrixx)):
+        for y in range(len(matrixy)):
+            if matrixx[x] == True:
+                if matrixy[y] == True:
+                    cv2.circle(image, (x, y), 5, (100, 100, 100), 10)
+
+
+    cv2.circle(image, (640, 480), 5, (100, 100, 100), 10)
     currentTime = time.time()
     fps = 1 // (currentTime - prevTime)
     cv2.putText(image, f'FPS: {int(fps)}', (450, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (240, 100, 0), 3)
