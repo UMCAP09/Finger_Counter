@@ -52,6 +52,10 @@ while cap.isOpened(): # проверка доступа к камере
             else:
                  if fingerslist[thumb_Coord[0]][0] > fingerslist[thumb_Coord[1]][0]:
                     upcount += 1
+            if upcount == 1:
+                matrixx[int(fingerslist[8][0])] = True
+                matrixy[int(fingerslist[8][1])] = True
+
 
 
 
@@ -59,8 +63,7 @@ while cap.isOpened(): # проверка доступа к камере
         print(upcount)
     for x in range(len(matrixx)):
         for y in range(len(matrixy)):
-            if matrixx[x] == True:
-                if matrixy[y] == True:
+            if matrixx[x] == True & matrixy[y] == True:
                     cv2.circle(image, (x, y), 5, (100, 100, 100), 10)
 
 
