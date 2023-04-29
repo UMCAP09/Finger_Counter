@@ -6,12 +6,13 @@ cap = cv2.VideoCapture(0) # подключение к камере
 mp_Hands = mp.solutions.hands # распознавание рук 
 hands = mp_Hands.Hands(max_num_hands = 1) # характеристики переменной
 mpDraw = mp.solutions.drawing_utils # инициализируем утилиту для рисования узлов
-matrixx = {}
+matrix = {}
 matrixy = {}
-for x in range(640):
-    matrixx[x] = False
-for y in range(480):
-    matrixy[y] = False
+for x in range(0, 640, 10):
+    for y in range(0, 480, 10):
+        matrix[str(x)+','+str(y)] = False
+
+
 
 finger_Coord = [(8, 6), (12, 10), (16, 14), (20, 18)] # координаты узлов
 thumb_Coord = (4, 3) # координаты узла большого пальца
@@ -50,27 +51,31 @@ while cap.isOpened(): # проверка доступа к камере
                 if fingerslist[thumb_Coord[0]][0] < fingerslist[thumb_Coord[1]][0]:
                     upcount += 1
             else:
-                 if fingerslist[thumb_Coord[0]][0] > fingerslist[thumb_Coord[1]][0]:
+                if fingerslist[thumb_Coord[0]][0] > fingerslist[thumb_Coord[1]][0]:
                     upcount += 1
             if upcount == 1:
-                matrixx[int(fingerslist[8][0])] = True
-                matrixy[int(fingerslist[8][1])] = True
+                matrix[str(fingerslist[8][0])+','+str(fingerslist[8][1])] = True
+
+
 
 
 
 
         cv2.putText(image, str(upcount), (50, 150), cv2.FONT_HERSHEY_PLAIN, 10, (0,200, 100), 5)
         print(upcount)
-    for x in range(len(matrixx)):
-        for y in range(len(matrixy)):
-            if matrixx[x] == True & matrixy[y] == True:
-                    cv2.circle(image, (x, y), 5, (100, 100, 100), 10)
 
 
-    cv2.circle(image, (640, 480), 5, (100, 100, 100), 10)
+
+
+        cv2.circle(image, (fingerslist[8][0], fingerslist[8][1]), 2, (100, 100, 100), 10)
+    for i in matrix:
+        if matrix[i] == True:
+            ide = i.split(',')
+            cv2.circle(image, (int(ide[0]), int(ide[1])), 1, (100, 100, 100), 10)
+
     currentTime = time.time()
     fps = 1 // (currentTime - prevTime)
     cv2.putText(image, f'FPS: {int(fps)}', (450, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (240, 100, 0), 3)
     cv2.imshow('image', image)
-    if cv2.waitKey(1) & 0xFF == 27: # выход
+    if cv2.waitKey(1)  & 0xFF == 27: # выход
         break
