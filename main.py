@@ -8,8 +8,8 @@ hands = mp_Hands.Hands(max_num_hands = 1) # характеристики пер�
 mpDraw = mp.solutions.drawing_utils # инициализируем утилиту для рисования узлов
 matrix = {}
 matrixy = {}
-for x in range(0, 640, 10):
-    for y in range(0, 480, 10):
+for x in range(0, 640, 20):
+    for y in range(0, 480, 20):
         matrix[str(x)+','+str(y)] = False
 
 
@@ -20,9 +20,9 @@ thumb_Coord = (4, 3) # координаты узла большого пальц
 while cap.isOpened(): # проверка доступа к камере
     success, image = cap.read() # получение картинки и переменной True/False
     prevTime = time.time() 
-    if not success: # в случае неудачи
-        print('Не удалось получить кадр с web-камеры')
-        continue
+    #if not success: # в случае неудачи
+        #print('Не удалось получить кадр с web-камеры')
+        #continue
     image = cv2.flip(image, 1) # зеркалим картинку
     RGB_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # преобразуем BGR в RGB
     result = hands.process(RGB_image) # запуск распознавания рук
@@ -31,10 +31,10 @@ while cap.isOpened(): # проверка доступа к камере
     if multiLandMarks: # если руки есть 
         for idx, handLms in enumerate(multiLandMarks):
             lbl = result.multi_handedness[idx].classification[0].label
-            print(lbl)
+            #print(lbl)
             upcount = 0
         for handlms in multiLandMarks:
-            mpDraw.draw_landmarks(image, handlms, mp_Hands.HAND_CONNECTIONS)
+            #mpDraw.draw_landmarks(image, handlms, mp_Hands.HAND_CONNECTIONS)
             fingerslist = []
             for idx, lm in enumerate(handLms.landmark):
                 h, w, c = image.shape
@@ -55,6 +55,16 @@ while cap.isOpened(): # проверка доступа к камере
                     upcount += 1
             if upcount == 1:
                 matrix[str(fingerslist[8][0])+','+str(fingerslist[8][1])] = True
+            if upcount == 5:
+                x1, y1 = fingerslist[4][0], fingerslist[20][1]  # координаты верхнего левого угла прямоугольника
+                x2, y2 = fingerslist[20][0], fingerslist[4][1]  # координаты нижнего правого угла прямоугольника
+                cv2.rectangle(image, (fingerslist[4][0], fingerslist[20][1]), (fingerslist[20][0], fingerslist[4][1]), (255, 255, 255), 30)
+
+                # Проходим по всем координатам в прямоугольнике
+                for x in range(x1, x2 + 1):
+                    for y in range(y1, y2 + 1):
+                        # Устанавливаем значение элемента равным False
+                        matrix[str(x)+','+str(y)] = False
 
 
 
@@ -62,16 +72,16 @@ while cap.isOpened(): # проверка доступа к камере
 
 
         cv2.putText(image, str(upcount), (50, 150), cv2.FONT_HERSHEY_PLAIN, 10, (0,200, 100), 5)
-        print(upcount)
+        #print(upcount)
 
 
 
 
-        cv2.circle(image, (fingerslist[8][0], fingerslist[8][1]), 2, (100, 100, 100), 10)
+        cv2.circle(image, (fingerslist[8][0], fingerslist[8][1]), 5, (100, 100, 100), 10)
     for i in matrix:
         if matrix[i] == True:
             ide = i.split(',')
-            cv2.circle(image, (int(ide[0]), int(ide[1])), 1, (100, 100, 100), 10)
+            cv2.circle(image, (int(ide[0]), int(ide[1])), 5, (0, 255, 0), 10)
 
     currentTime = time.time()
     fps = 1 // (currentTime - prevTime)
